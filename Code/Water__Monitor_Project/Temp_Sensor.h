@@ -1,9 +1,9 @@
 /*-----------------------------------------------------------------------------------------
- * 
- * 
- * 
- * 
- ------------------------------------------------------------------------------------------*/
+
+
+
+
+  ------------------------------------------------------------------------------------------*/
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -14,7 +14,7 @@ OneWire oneWire(TemperatureBusPin);
 DallasTemperature sensors(&oneWire);
 
 void setupTemp() {
-  sensors.begin(); 
+  sensors.begin();
 }
 
 void readTemperatures() {
