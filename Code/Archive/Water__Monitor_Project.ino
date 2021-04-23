@@ -18,24 +18,14 @@
 
   -----------------------------------------------------------------------------------------
 */
-
-//TFT
-#include "TFT_ILI9341.h"
-#include "TFT_Touch.h"
-#include <SPI.h>
-
-#define DOUT 44
-#define DIN  45
-#define DCS  46
-#define DCLK 47
-//CS   -  42
-//RST  -  48
-//DC   -  49
-//MOSI -  51
-//SCK  -  52
-
-TFT_ILI9341 tft = TFT_ILI9341();
-TFT_Touch touch = TFT_Touch(DCS, DCLK, DIN, DOUT);
+#include "FuncList.h"
+#include "TFT_Manager.h"
+#include "EC_Sensor.h"
+#include "PH_Sensor.h"
+#include "Temp_Sensor.h"
+#include "Turbidity_Sensor.h"
+#include "RTC_Manager.h"
+#include "SD_Manager.h"
 
 int MenuState = 3;
 #define bootPage 0
@@ -53,18 +43,10 @@ float TurbVals[arrLengths];
 
 float maxpH, maxEC, maxTemp, maxTurb = 1;
 
-float analogConstant;
-
 bool recording = false;
 
+
 void setup() {
-//  Serial.begin(9600);
-  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
-  int temp1 = analogRead(A15);
-  int temp2 = analogRead(A14);
-//  Serial.println(temp1);
-//  Serial.println(temp2);
-//  Serial.println(analogConstant,8);
   setupEC();
   setuppH();
   setupRTC();
@@ -72,6 +54,7 @@ void setup() {
   setupLCD();
   setupTemp();
   setupTurb();
+
   TFTdisplay();
 }
 
@@ -89,12 +72,6 @@ void loop() {
     case metersPage:
       readSensors();
       TFTdisplay();
-//      Serial.println(analogConstant, 8);
-      float temp = (float(analogRead(A15)) * 5.0 / 1024.0) * analogConstant;
-      float temp2 = analogRead(A15);
-//      Serial.println(temp, 8);
-//      Serial.println(temp2, 8);
-//      Serial.println("update");
       break;
     case clockPage:
 
@@ -104,7 +81,6 @@ void loop() {
 }
 
 void readSensors() {
-  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
   pHVal = calculatepH();
   ECVal = generateTDS();
   TempVal = generateTemperatureC();
@@ -122,13 +98,10 @@ void readSensors() {
   if (TurbVal > maxTurb) {
     maxTurb = 100 * ceil(TurbVal / 100);
   }
-
   constrain(pHVal, 0, maxpH);
   constrain(ECVal, 0, maxEC);
   constrain(TempVal, 0, maxTemp);
   constrain(TurbVal, 0, maxTurb);
-
-
 
   for (int i = arrLengths - 1; i > 0; i--) {
     pHVals[i] = pHVals[i - 1];
@@ -140,29 +113,4 @@ void readSensors() {
   ECVals[0] = ECVal;
   TempVals[0] = TempVal;
   TurbVals[0] = TurbVal;
-
-  for (int i = 0; i < arrLengths; i++) {
-    float maxpHTemp;
-    float maxECTemp;
-    float maxTempTemp;
-    float maxTurbTemp;
-
-    if (pHVals[i] > maxpHTemp) {
-      maxpHTemp = pHVals[i];
-    }
-    if (ECVals[i] > maxECTemp) {
-      maxECTemp = ECVals[i];
-    }
-    if (TempVals[i] > maxTempTemp) {
-      maxTempTemp = TempVals[i];
-    }
-    if (TurbVals[i] > maxTurbTemp) {
-      maxTurbTemp = TurbVals[i];
-    }
-
-    maxpH = 5 * ceil(maxpHTemp / 5);
-    maxEC = 100 * ceil(maxECTemp / 100);
-    maxTemp = 10 * ceil(maxTempTemp / 10);
-    maxTurb = 100 * ceil(maxTurbTemp / 100);
-  }
 }
