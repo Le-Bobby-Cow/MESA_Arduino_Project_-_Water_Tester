@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------
+  Manager for the Real Time Clock Module (DS3231)
 
-
-
+  Module connected to dedicated SCL and SDA pins
 
   ------------------------------------------------------------------------------------------*/
 
@@ -38,4 +38,11 @@ String logTime() {
   String logPhrase = "";
   logPhrase = (String(now.month()) + "/") + (String(now.day()) + "/") + (String(now.year()) + "  ") + (String(now.hour()) + ":") + (String(now.minute()) + ":") + String(now.second());
   return logPhrase;
+}
+
+String fileTimestamp() {
+  DateTime now = rtc.now();
+  String Timestamp = "";
+  Timestamp = String(now.month()) + "." + String(now.day()) + "." + String(now.year()) + "-" + String(now.hour()) + "." + String(now.minute());
+  return Timestamp;
 }

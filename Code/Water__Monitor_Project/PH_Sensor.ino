@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------------------------------
+  Manager for the pH Probe
 
-
-
+  Sensor Connected to Pin A2 of Arduino
 
   ------------------------------------------------------------------------------------------*/
 #define SensorPin A2
@@ -11,7 +11,7 @@
 
 float pHArray[numReadings];
 
-float calibration_value = 20; //21.34
+float calibration_value = 21.34;
 int phval = 0;
 unsigned long int avgval;
 int buffer_arr[10], temp;
@@ -49,7 +49,7 @@ float calculatepH() {
   for (int i = 0; i < 10; i++)
   {
     buffer_arr[i] = float(analogRead(SensorPin)) * analogConstant;
-    delay(30);
+    delay(5);
   }
   for (int i = 0; i < 9; i++)
   {

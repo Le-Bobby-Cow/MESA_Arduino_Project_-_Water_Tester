@@ -19,30 +19,13 @@
   -----------------------------------------------------------------------------------------
 */
 
-//TFT
-#include "TFT_ILI9341.h"
-#include "TFT_Touch.h"
-#include <SPI.h>
+#include <arduino-timer.h>
 
-#define DOUT 44
-#define DIN  45
-#define DCS  46
-#define DCLK 47
-//CS   -  42
-//RST  -  48
-//DC   -  49
-//MOSI -  51
-//SCK  -  52
+auto timer = timer_create_default();
 
-TFT_ILI9341 tft = TFT_ILI9341();
-TFT_Touch touch = TFT_Touch(DCS, DCLK, DIN, DOUT);
-
-int MenuState = 3;
+int MenuState = 0;
 #define bootPage 0
-#define mainMenuPage 1
-#define filePage 2
-#define metersPage 3
-#define clockPage 4
+#define metersPage 1
 
 const int arrLengths = 60;
 float pHVal, ECVal, TempVal, TurbVal;
@@ -58,58 +41,51 @@ float analogConstant;
 bool recording = false;
 
 void setup() {
-//  Serial.begin(9600);
-  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
-  int temp1 = analogRead(A15);
-  int temp2 = analogRead(A14);
-//  Serial.println(temp1);
-//  Serial.println(temp2);
-//  Serial.println(analogConstant,8);
-  setupEC();
+  Serial.begin(9600);
+
+  setupEC(); //Setup all devices
   setuppH();
-  setupRTC();
-  setupSD();
-  setupLCD();
   setupTemp();
   setupTurb();
+
+  setupRTC();
+  setupLCD();
+
+  delay(500);
+  setupSD();
+
+  TFTdisplay(); //Boot screen to allow delay to occur
+  delay(1000);
+
+  timer.every(500, readSensors);
+  timer.every(1000, TFTdisplay);
+  timer.every(50, readTouch);
+
+  delay(2000);
+  MenuState = 1;
+  clearDisplay();
   TFTdisplay();
 }
 
 void loop() {
+  timer.tick(); //Internal Timer Setup
   switch (MenuState) {
-    case bootPage:
-
+    case bootPage: //Introductory Page
       break;
-    case mainMenuPage:
-
-      break;
-    case filePage:
-
-      break;
-    case metersPage:
-      readSensors();
-      TFTdisplay();
-//      Serial.println(analogConstant, 8);
-      float temp = (float(analogRead(A15)) * 5.0 / 1024.0) * analogConstant;
-      float temp2 = analogRead(A15);
-//      Serial.println(temp, 8);
-//      Serial.println(temp2, 8);
-//      Serial.println("update");
-      break;
-    case clockPage:
-
+    case metersPage: //Main Meters Page
       break;
   }
-  delay(100);
 }
 
-void readSensors() {
+bool readSensors() { //Read all sensor data
+  //Gather Data
   analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
   pHVal = calculatepH();
   ECVal = generateTDS();
   TempVal = generateTemperatureC();
   TurbVal = calculateTurbidity();
 
+  //Determine Max Values
   if (pHVal > maxpH) {
     maxpH = 5 * ceil(pHVal / 5);
   }
@@ -123,13 +99,13 @@ void readSensors() {
     maxTurb = 100 * ceil(TurbVal / 100);
   }
 
+  //Limit the readings values
   constrain(pHVal, 0, maxpH);
   constrain(ECVal, 0, maxEC);
   constrain(TempVal, 0, maxTemp);
   constrain(TurbVal, 0, maxTurb);
 
-
-
+  //Shift data array
   for (int i = arrLengths - 1; i > 0; i--) {
     pHVals[i] = pHVals[i - 1];
     ECVals[i] = ECVals[i - 1];
@@ -141,6 +117,7 @@ void readSensors() {
   TempVals[0] = TempVal;
   TurbVals[0] = TurbVal;
 
+  //Check for new high reading
   for (int i = 0; i < arrLengths; i++) {
     float maxpHTemp;
     float maxECTemp;
@@ -160,9 +137,29 @@ void readSensors() {
       maxTurbTemp = TurbVals[i];
     }
 
-    maxpH = 5 * ceil(maxpHTemp / 5);
+    maxpH = constrain(5 * ceil(maxpHTemp / 5), 0, 15);
     maxEC = 100 * ceil(maxECTemp / 100);
     maxTemp = 10 * ceil(maxTempTemp / 10);
     maxTurb = 100 * ceil(maxTurbTemp / 100);
   }
+
+  //Log Data if applicable
+  if (recording) {
+    logData();
+  }
+
+  //Send though serial port if applicable
+  if (Serial) {
+    Serial.print(logTime() + ",");
+    Serial.print(String(pHVal) + ",");
+    Serial.print(String(ECVal) + ",");
+    Serial.print(String(TempVal) + ",");
+    Serial.print(String(TurbVal) + '\n');
+  }
+  return true;
+}
+
+String dataString() {
+  String data = logTime() + "," + String(pHVal) + "," + String(ECVal) + "," + String(TempVal) + "," + String(TurbVal);
+  return data;
 }
