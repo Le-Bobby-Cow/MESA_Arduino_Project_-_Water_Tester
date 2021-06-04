@@ -17,8 +17,9 @@ float maxpH, maxEC, maxTemp, maxTurb;
 void setup() 
 {
   size(1200, 600);
+  // Initialize the Serial Port
   try {
-    myPort = new Serial(this, Serial.list()[0], 9600);
+    myPort = new Serial(this, Serial.list()[1], 9600);
     myPort.bufferUntil('\n');
   } 
   catch (Exception e) {
@@ -28,11 +29,13 @@ void setup()
 
 void draw()
 {
+  // Draw all data
   background(195);
   drawGraphs();
 }
 
 void drawGraphs() {
+  // Draw all line graphs
   stroke(0);
   strokeWeight(2);
   fill(255);
@@ -55,6 +58,8 @@ void drawGraphs() {
   for (int i = 0; i < TurbVals.length - 1; i++) {
     line(425 + i * 2, 300 + ((200 / maxTurb) * (maxTurb - TurbVals[i])), 425 + (1 + i) * 2, 300 + ((200 / maxTurb) * (maxTurb - TurbVals[i + 1])));
   }
+
+// Draw rating graphs
 
   fill(0);
   stroke(255);
@@ -135,6 +140,7 @@ void drawGraphs() {
 
 void manageValues() {
 
+  // Manage the input string
   pHVal = float(splitInputs[1]);
   ECVal = float(splitInputs[2]);
   TempVal = float(splitInputs[3]);

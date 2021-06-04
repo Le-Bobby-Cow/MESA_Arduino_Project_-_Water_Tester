@@ -6,10 +6,10 @@
   ------------------------------------------------------------------------------------------*/
 #include <SdFat.h>
 
-const uint8_t SOFT_MISO_PIN = 28;
-const uint8_t SOFT_MOSI_PIN = 30;
-const uint8_t SOFT_SCK_PIN  = 32;
-const uint8_t SD_CHIP_SELECT_PIN = 34;
+const uint8_t SOFT_MISO_PIN = 29;
+const uint8_t SOFT_MOSI_PIN = 31;
+const uint8_t SOFT_SCK_PIN  = 33;
+const uint8_t SD_CHIP_SELECT_PIN = 35;
 
 SdFatSoftSpi<SOFT_MISO_PIN, SOFT_MOSI_PIN, SOFT_SCK_PIN> sd;
 
