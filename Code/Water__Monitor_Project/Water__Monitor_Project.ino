@@ -57,9 +57,12 @@ void setup() {
   TFTdisplay(); //Boot screen to allow delay to occur
   delay(1000);
 
+  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
+
   timer.every(500, readSensors);
   timer.every(1000, TFTdisplay);
   timer.every(50, readTouch);
+  timer.every(10000, calibrateVolt);
 
   delay(2000);
   MenuState = 1;
@@ -79,7 +82,7 @@ void loop() {
 
 bool readSensors() { //Read all sensor data
   //Gather Data
-  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
+  //analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
   pHVal = calculatepH();
   ECVal = generateTDS();
   TempVal = generateTemperatureC();
@@ -157,6 +160,11 @@ bool readSensors() { //Read all sensor data
     Serial.print(String(TurbVal) + '\n');
   }
   return true;
+}
+
+void calibrateVolt() {
+  analogConstant = (3.37 / 5.0) / (float(analogRead(A15)) / float(analogRead(A14)));
+  //Serial.println(analogConstant);
 }
 
 String dataString() {

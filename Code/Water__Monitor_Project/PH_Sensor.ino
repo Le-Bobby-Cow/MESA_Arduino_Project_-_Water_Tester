@@ -11,7 +11,7 @@
 
 float pHArray[numReadings];
 
-float calibration_value = 16.34;
+float calibration_value = 21.2;
 int phval = 0;
 unsigned long int avgval;
 int buffer_arr[10], temp;

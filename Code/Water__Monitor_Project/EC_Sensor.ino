@@ -6,7 +6,7 @@
   ------------------------------------------------------------------------------------------*/
 #define SensorPin A1
 
-float offset = 0;
+float offset = 70;
 
 void setupEC() {
 }
@@ -19,7 +19,7 @@ float readECRaw() {
 
 float generateEC() {
   float voltage;
-  voltage = readECRaw() * analogConstant * (5.0 / 1024.0);
+  voltage = readECRaw() * (5.0 / 1024.0);
   return voltage;
 }
 
@@ -27,5 +27,5 @@ float generateTDS() {
   float TDS;
   float voltage = generateEC();
   TDS = ((133.42 * (pow(voltage, 3)) - (255.86 * sq(voltage)) + (857.39 * voltage)) * 0.5) - offset;
-  return TDS;//constrain(TDS, 0.0, 5000.0);
+  return constrain(TDS, 0.0, 5000.0);
 }
