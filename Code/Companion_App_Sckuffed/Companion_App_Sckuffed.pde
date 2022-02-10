@@ -1,6 +1,6 @@
 import processing.serial.*;
 
-Serial myPort;  // Create object from Serial class
+//Serial myPort;  // Create object from Serial class
 String input = ",,,,";      // Data received from the serial port
 String[] splitInputs = {"", "", "", "", ""};
 
@@ -18,19 +18,21 @@ void setup()
 {
   size(1200, 600);
   // Initialize the Serial Port
-  try {
-    myPort = new Serial(this, Serial.list()[0], 9600);
-    myPort.bufferUntil('\n');
-  } 
-  catch (Exception e) {
-    stop();
-  }
+  //try {
+  //  myPort = new Serial(this, Serial.list()[0], 9600);
+  //  myPort.bufferUntil('\n');
+  //} 
+  //catch (Exception e) {
+  //  stop();
+  //}
 }
 
 void draw()
 {
   // Draw all data
   background(195);
+  manageValues();
+  delay(500);
   drawGraphs();
 }
 
@@ -141,10 +143,10 @@ void drawGraphs() {
 void manageValues() {
 
   // Manage the input string
-  pHVal = float(splitInputs[1]);
-  ECVal = float(splitInputs[2]);
-  TempVal = float(splitInputs[3]);
-  TurbVal = float(splitInputs[4]);
+  pHVal = random(6.9, 7.1);
+  ECVal = random(140, 150);
+  TempVal = random(22, 22.5);
+  TurbVal = random(10, 20);
 
   //Determine Max Values
   if (pHVal > maxpH) {
@@ -208,13 +210,13 @@ void manageValues() {
 }
 
 void serialEvent(Serial myPort) { 
-  input = myPort.readString();         // read it and store it in val
-  input = trim(input);
-  println(input);
-  String[] prevVals = splitInputs;
-  splitInputs = split(input, ',');
-  if (splitInputs.length < 5) {
-    splitInputs = prevVals;
-  }
+  //input = myPort.readString();         // read it and store it in val
+  //input = trim(input);
+  //println(input);
+  //String[] prevVals = splitInputs;
+  //splitInputs = split(input, ',');
+  //if (splitInputs.length < 5) {
+  //  splitInputs = prevVals;
+  //}
   manageValues();
 } 
